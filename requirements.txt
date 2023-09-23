@@ -1,0 +1,6 @@
+fastapi==0.103.1
+python-jose
+passlib
+bcrypt
+pymongo
+python-multipart
