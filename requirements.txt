@@ -4,3 +4,4 @@ passlib
 bcrypt
 pymongo
 python-multipart
+flet-fastapi

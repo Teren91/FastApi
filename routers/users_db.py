@@ -34,10 +34,6 @@ async def getUser(id:str):
 #CREATE
 @router.post("/", response_model=ModelUser, status_code=status.HTTP_201_CREATED,) 
 async def createUser(user:ModelUser):
-    if type(search_user("email", user.email)) == ModelUser:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, 
-                            detail="User already exists")
-
     user_dict = dict(user)
     del user_dict["id"] #Borrar el id para que MongoDB lo genere
 
@@ -53,15 +49,17 @@ async def createUser(user:ModelUser):
 async def updateUser(user:ModelUser):
     
     
-    if type(search_user("_id", ObjectId(user.id))) != ModelUser:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                            detail="User not found")    
+    # if type(search_user("_id", ObjectId(user.id))) != ModelUser:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+    #                         detail="User not found")    
     
     try:
+        id = ModelUser(**schema_user(db_client.users.find_one({"email":user.email}))).id
         user_dict = dict(user)
-        del user_dict["id"]
-        db_client.users.find_one_and_replace({"_id":ObjectId(user.id)}, 
+        #del user_dict["id"]
+        db_client.users.find_one_and_replace({"_id":ObjectId(id)}, 
                                                    user_dict)
+       
         
         return search_user("_id", ObjectId(user.id))
     except:
@@ -87,4 +85,44 @@ def search_user(key: str, value: str | ObjectId | int):
     try:
         return ModelUser(**schema_user(db_client.users.find_one({key:value})))
     except:
-        return {"message":"User not found - search_user"} 
+        return None
+    
+
+async def create_user(username: str, email: str):
+    try:
+        if search_user("email", email) != None:
+            return HTTPException(status_code=status.HTTP_409_CONFLICT, 
+                                 detail="User already exists")
+            # raise HTTPException(status_code=status.HTTP_409_CONFLICT, 
+            #                     detail="User already exists")
+        
+        user: ModelUser = get_user(username, email)
+        await createUser(user)
+    except:
+        return HTTPException(status_code=status.HTTP_409_CONFLICT, 
+                                 detail="Error creating user")
+    
+async def update_user(username: str, email: str):
+    try:
+        if search_user("email", email) == None:
+            return HTTPException(status_code=status.HTTP_409_CONFLICT, 
+                                 detail="User not exists")
+        user: ModelUser = get_user(username, email)
+        await updateUser(user)
+    except:
+        return HTTPException(status_code=status.HTTP_409_CONFLICT, 
+                                 detail="Error updating user")
+
+async def delete_user(username: str):
+    try:
+        user = search_user("userName", username)
+        if user == None:
+            return HTTPException(status_code=status.HTTP_409_CONFLICT, 
+                                 detail="User not exists")
+        await deleteUser(user.id)
+    except:
+        return HTTPException(status_code=status.HTTP_409_CONFLICT, 
+                                 detail="Error deleting user")  
+
+def get_user(username: str, email: str):
+   return  {"id":0,"userName": username, "email":email}
