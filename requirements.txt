@@ -1,3 +1,5 @@
+flet
+flet_fastapi
 fastapi==0.103.1
 python-jose
 passlib
