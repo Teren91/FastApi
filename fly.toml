@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for fletapp on 2023-09-28T19:07:50+02:00
+# fly.toml app configuration file generated for fletapp on 2023-09-29T12:12:32+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -12,15 +12,15 @@ kill_timeout = "5s"
   auto_rollback = true
 
 [build]
-  image = "fletapp"
+  image = "docker/dev-environments-default:stable-1"
 
 [env]
   FLET_FORCE_WEB_VIEW = "true"
-  FLET_SERVER_PORT = "8080"
+  FLET_SERVER_PORT = "8089"
 
 [[services]]
   protocol = "tcp"
-  internal_port = 8080
+  internal_port = 8089
   processes = ["app"]
 
   [[services.ports]]
