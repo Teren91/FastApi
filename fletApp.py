@@ -3,21 +3,12 @@ import flet_fastapi
 from routers import products, users, basic_auth_users, jwt_auth_users, users_db
 
 
-app = flet_fastapi.app()
 
-app.include_router(products.router)
-app.include_router(users.router)
-
-app.include_router(basic_auth_users.router)
-app.include_router(jwt_auth_users.router)
-
-app.include_router(users_db.router)
 
 async def main(page: ft.Page):
     page.title= "Testing FastApi + Flet"
     page.window_max_width = 360,
     page.window_max_height = 740,
-    await page.update_async()
 
     async def btnCreate_clicked(e):
         await users_db.create_user(txtUsername.value, txtEmail.value)
@@ -81,8 +72,19 @@ async def main(page: ft.Page):
             btnDelete            
         ]),
     )
+    await page.update_async()
 
+app = flet_fastapi.app(main)
 
+ft.app(target=main)
+
+app.include_router(products.router)
+app.include_router(users.router)
+
+app.include_router(basic_auth_users.router)
+app.include_router(jwt_auth_users.router)
+
+app.include_router(users_db.router)
 
 #ft.app(target=main)
 app.mount("/", flet_fastapi.app(main))
